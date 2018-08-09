@@ -33,7 +33,7 @@ cpan_do_configure () {
 		for f in `find -name Makefile.PL`; do
 			f2=`echo $f | sed -e 's/.PL//'`
 			test -f $f2 || continue
-			sed -i -e "s:\(PERL_ARCHLIB = \).*:\1${PERL_ARCHLIB}:" \
+				sed -i -e "s:\(PERL_ARCHLIB = \).*:\1${PERL_ARCHLIB}:" \
 				-e 's/perl.real/perl/' \
 				-e "s|^\(CCFLAGS =.*\)|\1 ${CFLAGS}|" \
 				$f2
@@ -42,11 +42,13 @@ cpan_do_configure () {
 }
 
 cpan_do_compile () {
+	export PERL5LIB="${PERL_ARCHLIB}"
 	oe_runmake PASTHRU_INC="${CFLAGS}" LD="${CCLD}"
 }
 
 cpan_do_install () {
-	oe_runmake DESTDIR="${D}" install_vendor
+	export PERL5LIB="${PERL_ARCHLIB}"
+	oe_runmake DESTDIR="${D}" install
 	for PERLSCRIPT in `grep -rIEl '#! *${bindir}/perl-native.*/perl' ${D}`; do
 		sed -i -e 's|${bindir}/perl-native.*/perl|/usr/bin/env nativeperl|' $PERLSCRIPT
 	done
